@@ -1,13 +1,14 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { Activity, ShieldCheck, UserCheck, Stethoscope, ArrowRight } from "lucide-react"
+import { Activity, ArrowRight, ShieldCheck, Stethoscope, UserCheck } from "lucide-react"
 
 interface WelcomeScreenProps {
   onStart: () => void
+  onShowDashboard: () => void
 }
 
-export default function WelcomeScreen({ onStart }: WelcomeScreenProps) {
+export default function WelcomeScreen({ onStart, onShowDashboard }: WelcomeScreenProps) {
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4 md:p-8 relative overflow-hidden">
       {/* Decorative Background Elements */}
@@ -70,9 +71,14 @@ export default function WelcomeScreen({ onStart }: WelcomeScreenProps) {
             <div className="absolute inset-0 h-full w-full scale-0 rounded-2xl transition-all duration-300 group-hover:scale-100 group-hover:bg-white/10" />
           </Button>
 
-          <p className="text-slate-400 text-sm font-medium">
-            Temps estimé : 2 minutes • Anonyme & Confidentiel
-          </p>
+          <Button
+            onClick={onShowDashboard}
+            variant="ghost"
+            className="text-slate-500 hover:text-teal-600 hover:bg-teal-50 transition-colors"
+          >
+            <Activity className="w-4 h-4 mr-2" />
+            Voir les Statistiques de Santé
+          </Button>
         </div>
       </div>
     </div>

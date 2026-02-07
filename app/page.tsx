@@ -1,142 +1,116 @@
 "use client"
 
-import { useState } from "react"
-import WelcomeScreen from "@/components/screens/welcome-screen"
+import AnalyticsDashboard from "@/components/screens/analytics-dashboard"
+import AuthScreen from "@/components/screens/auth-screen"
 import QuestionnaireScreen from "@/components/screens/questionnaire-screen"
 import ResultScreen from "@/components/screens/result-screen"
+import WelcomeScreen from "@/components/screens/welcome-screen"
 import type { QuestionnaireData, ResultData } from "@/lib/types"
+import { useState } from "react"
 
 export default function Home() {
-  const [screen, setScreen] = useState<"welcome" | "questionnaire" | "result">("welcome")
+  const [screen, setScreen] = useState<"welcome" | "auth" | "questionnaire" | "result" | "dashboard">("welcome")
+  const [loading, setLoading] = useState(false)
+  const [session, setSession] = useState<{ health_center: string; nurse_name: string } | null>(null)
   const [questionnaireData, setQuestionnaireData] = useState<QuestionnaireData | null>(null)
   const [resultData, setResultData] = useState<ResultData | null>(null)
 
   const handleStartQuestionnaire = () => {
+    setScreen("auth")
+  }
+
+  const handleLogin = (data: { health_center: string; nurse_name: string }) => {
+    setSession(data)
     setScreen("questionnaire")
   }
 
-  const handleQuestionnaireComplete = (data: QuestionnaireData) => {
+  const handleShowDashboard = () => {
+    setScreen("dashboard")
+  }
+
+  const handleQuestionnaireComplete = async (data: QuestionnaireData) => {
+    setLoading(true)
     setQuestionnaireData(data)
-    // Calculate score and generate result
-    const result = calculateScore(data)
-    setResultData(result)
-    setScreen("result")
+    
+    // Preparation of data for API
+    const payload = {
+      ...data,
+      consultation_id: `CONS-${Date.now()}`,
+      source_type: "kiosque",
+      timestamp: new Date().toISOString()
+    }
+
+    console.log("=== FINAL PAYLOAD TO BACKEND ===", JSON.stringify(payload, null, 2))
+
+    try {
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"
+      const response = await fetch(`${API_URL}/triage/evaluate`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      })
+
+      if (!response.ok) throw new Error("Erreur de communication avec le serveur")
+
+      const result = await response.json()
+      console.log("=== AI RESPONSE FROM BACKEND ===", result)
+      
+      // Map API result to ResultData
+      const riskColorMap: Record<string, string> = {
+        "Faible": "#34C759",
+        "Modéré": "#FFC107",
+        "Élevé": "#FF3B30",
+        "Très Élevé": "#FF3B30"
+      }
+
+      setResultData({
+        score: result.ml_scores.gravite_oms,
+        riskLevel: result.risk_level,
+        riskColor: riskColorMap[result.risk_level] || "#888",
+        recommendation: result.clinical_guidelines.recommendations,
+        orientation: result.clinical_guidelines.orientation,
+        explanations: result.explanations
+      })
+      
+      setScreen("result")
+    } catch (error) {
+      console.error("Triage Error:", error)
+      alert("Une erreur est survenue lors du calcul du triage. Veuillez réessayer.")
+    } finally {
+      setLoading(false)
+    }
   }
 
   const handleNewTest = () => {
     setQuestionnaireData(null)
     setResultData(null)
-    setScreen("welcome")
+    setScreen("questionnaire") // Go back to questionnaire directly if still authenticated
   }
 
   return (
     <main className="min-h-screen">
-      {screen === "welcome" && <WelcomeScreen onStart={handleStartQuestionnaire} />}
-      {screen === "questionnaire" && <QuestionnaireScreen onComplete={handleQuestionnaireComplete} />}
-      {screen === "result" && resultData && <ResultScreen data={resultData} onNewTest={handleNewTest} />}
+      {loading && (
+        <div className="fixed inset-0 bg-white/80 z-50 flex flex-col items-center justify-center">
+          <div className="w-16 h-16 border-4 border-teal-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+          <p className="text-teal-900 font-bold text-xl animate-pulse">Analyse Diagnostique en cours...</p>
+        </div>
+      )}
+      {screen === "welcome" && <WelcomeScreen onStart={handleStartQuestionnaire} onShowDashboard={handleShowDashboard} />}
+      {screen === "auth" && <AuthScreen onLogin={handleLogin} />}
+      {screen === "questionnaire" && session && (
+        <QuestionnaireScreen 
+          onComplete={handleQuestionnaireComplete} 
+          sessionData={session}
+        />
+      )}
+      {screen === "result" && resultData && questionnaireData && (
+        <ResultScreen 
+          data={resultData} 
+          questionnaire={questionnaireData}
+          onNewTest={handleNewTest} 
+        />
+      )}
+      {screen === "dashboard" && <AnalyticsDashboard onBack={() => setScreen("welcome")} />}
     </main>
   )
-}
-
-// Score calculation logic based on WHO severe malaria criteria
-function calculateScore(data: QuestionnaireData): ResultData {
-  let score = 0
-  const criteres: string[] = []
-
-  // Age factor (young children and elderly at higher risk)
-  if (data.age < 5) {
-    score += 15
-    criteres.push("Enfant de moins de 5 ans")
-  } else if (data.age > 65) {
-    score += 10
-  }
-
-  // Fever presence
-  if (data.hasFever) {
-    score += 20
-  }
-
-  // Temperature
-  if (data.temperature >= 39.5) {
-    score += 15
-    criteres.push("Fièvre élevée (≥39.5°C)")
-  } else if (data.temperature >= 38) {
-    score += 10
-  }
-
-  // Severe malaria criteria (WHO)
-  if (data.troubleConsciousness) {
-    score += 25
-    criteres.push("Trouble de la conscience")
-  }
-
-  if (data.convulsions) {
-    score += 20
-    criteres.push("Convulsions")
-  }
-
-  if (data.severeAnemia) {
-    score += 15
-    criteres.push("Anémie sévère")
-  }
-
-  if (data.respiratoryDistress) {
-    score += 20
-    criteres.push("Détresse respiratoire")
-  }
-
-  if (data.jaundice) {
-    score += 10
-    criteres.push("Ictère")
-  }
-
-  if (data.hemoglobinuria) {
-    score += 15
-    criteres.push("Hémoglobinurie")
-  }
-
-  // Parasitemia
-  if (data.hasParasitemia && data.parasitemiaLevel) {
-    if (data.parasitemiaLevel >= 5) {
-      score += 20
-      criteres.push(`Parasitémie élevée (${data.parasitemiaLevel}%)`)
-    } else if (data.parasitemiaLevel >= 2) {
-      score += 10
-    }
-  }
-
-  // Cap score at 100
-  score = Math.min(score, 100)
-
-  // Determine risk level and recommendation
-  let riskLevel: "FAIBLE" | "MODÉRÉ" | "ÉLEVÉ" | "TRÈS ÉLEVÉ"
-  let riskColor: string
-  let recommendation: string
-
-  if (score < 25) {
-    riskLevel = "FAIBLE"
-    riskColor = "#34C759"
-    recommendation = "Consultation externe simple recommandée. Surveillance des symptômes."
-  } else if (score < 50) {
-    riskLevel = "MODÉRÉ"
-    riskColor = "#FFC107"
-    recommendation = "Consultation médicale recommandée dans les 24 heures. Test de diagnostic rapide (TDR) conseillé."
-  } else if (score < 75) {
-    riskLevel = "ÉLEVÉ"
-    riskColor = "#FF9500"
-    recommendation = "Consultation médicale URGENTE requise. Prise en charge immédiate nécessaire."
-  } else {
-    riskLevel = "TRÈS ÉLEVÉ"
-    riskColor = "#FF3B30"
-    recommendation = "⚠️ URGENCES IMMÉDIATES - Signes de paludisme grave. Hospitalisation requise."
-  }
-
-  return {
-    score,
-    riskLevel,
-    riskColor,
-    recommendation,
-    criteres,
-    severeCriteriaCount: criteres.length,
-  }
 }
