@@ -65,7 +65,7 @@ export default function ResultScreen({ data, questionnaire, onNewTest }: ResultS
 
   // Determine official theme colors based on risk
   const getTheme = () => {
-    const risk = data.riskLevel.toLowerCase()
+    const risk = (data.riskLevel || "").toLowerCase()
     
     if (risk.includes("faible")) 
       return { 
