@@ -1,7 +1,8 @@
-import type React from "react"
+import FullscreenToggle from "@/components/fullscreen-toggle"
+import { Analytics } from "@vercel/analytics/next"
 import type { Metadata, Viewport } from "next"
 import { Plus_Jakarta_Sans } from "next/font/google"
-import { Analytics } from "@vercel/analytics/next"
+import type React from "react"
 import "./globals.css"
 
 const plusJakarta = Plus_Jakarta_Sans({
@@ -35,6 +36,7 @@ export default function RootLayout({
     <html lang="fr" className="h-full">
       <body className={`${plusJakarta.variable} font-sans antialiased h-full bg-slate-50 text-slate-900 selection:bg-teal-100 selection:text-teal-900`}>
         {children}
+        <FullscreenToggle />
         <Analytics />
       </body>
     </html>

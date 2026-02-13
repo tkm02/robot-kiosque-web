@@ -136,42 +136,27 @@ export const questions: Question[] = [
     visibleIf: (data) => !!data.enceinte,
   },
 
-  // 2. Localisation
+  // 2. Localisation (Simplifié - commune uniquement)
   {
     id: 12,
     field: "district",
-    question: "District Sanitaire",
-    icon: "🗺️",
-    type: "synced-select",
-    required: true,
-  },
-  {
-    id: 13,
-    field: "region",
-    question: "Région",
+    question: "Commune / Ville",
     icon: "📍",
-    type: "synced-select",
+    type: "text",
     required: true,
-    dependsOn: "district",
+    helpText: "Entrez votre commune ou ville",
+    suggestions: [
+      { label: "Abidjan", value: "abidjan" },
+      { label: "Yamoussoukro", value: "yamoussoukro" },
+      { label: "Bouaké", value: "bouake" },
+      { label: "Korhogo", value: "korhogo" },
+      { label: "San-Pédro", value: "san-pedro" },
+      { label: "Man", value: "man" },
+      { label: "Daloa", value: "daloa" },
+      { label: "Gagnoa", value: "gagnoa" },
+    ],
   },
-  {
-    id: 14,
-    field: "commune",
-    question: "Commune / Sous-Préfecture",
-    icon: "🏠",
-    type: "synced-select",
-    required: true,
-    dependsOn: "region",
-  },
-  {
-    id: 15,
-    field: "geolocation",
-    question: "Coordonnées GPS",
-    icon: "📡",
-    type: "geolocation",
-    required: false,
-    helpText: "Récupération automatique du kiosque",
-  },
+
   {
     id: 16,
     field: "usage_moustiquaire",

@@ -1,23 +1,23 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { ArrowRight, Building2, ShieldCheck, UserCircle2 } from "lucide-react"
+import { ArrowRight, Lock, ShieldCheck, UserCircle2 } from "lucide-react"
 import { useState } from "react"
 
 interface AuthScreenProps {
-  onLogin: (data: { health_center: string; nurse_name: string }) => void
+  onLogin: (data: { nurse_name: string; password: string }) => void
 }
 
 export default function AuthScreen({ onLogin }: AuthScreenProps) {
   const [formData, setFormData] = useState({
-    health_center: "",
     nurse_name: "",
+    password: "",
   })
   const [error, setError] = useState("")
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (!formData.health_center || !formData.nurse_name) {
+    if (!formData.nurse_name || !formData.password) {
       setError("Veuillez remplir tous les champs pour continuer.")
       return
     }
@@ -36,19 +36,6 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="space-y-2">
-            <label className="text-sm font-bold text-slate-700 ml-1">Centre de Santé</label>
-            <div className="relative">
-              <Building2 className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-              <input
-                type="text"
-                placeholder="Ex: CHR de Man, CSU de Cocody..."
-                className="w-full pl-12 pr-4 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:border-teal-500 focus:bg-white focus:outline-none transition-all font-medium text-slate-900"
-                value={formData.health_center}
-                onChange={(e) => setFormData({ ...formData, health_center: e.target.value })}
-              />
-            </div>
-          </div>
 
           <div className="space-y-2">
             <label className="text-sm font-bold text-slate-700 ml-1">Nom de l'Infirmier(e)</label>
@@ -60,6 +47,20 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
                 className="w-full pl-12 pr-4 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:border-teal-500 focus:bg-white focus:outline-none transition-all font-medium text-slate-900"
                 value={formData.nurse_name}
                 onChange={(e) => setFormData({ ...formData, nurse_name: e.target.value })}
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-bold text-slate-700 ml-1">Mot de passe</label>
+            <div className="relative">
+              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+              <input
+                type="password"
+                placeholder="Votre mot de passe"
+                className="w-full pl-12 pr-4 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:border-teal-500 focus:bg-white focus:outline-none transition-all font-medium text-slate-900"
+                value={formData.password}
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
               />
             </div>
           </div>

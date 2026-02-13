@@ -11,7 +11,7 @@ import { useState } from "react"
 export default function Home() {
   const [screen, setScreen] = useState<"welcome" | "auth" | "questionnaire" | "result" | "dashboard">("welcome")
   const [loading, setLoading] = useState(false)
-  const [session, setSession] = useState<{ health_center: string; nurse_name: string } | null>(null)
+  const [session, setSession] = useState<{ nurse_name: string; password: string } | null>(null)
   const [questionnaireData, setQuestionnaireData] = useState<QuestionnaireData | null>(null)
   const [resultData, setResultData] = useState<ResultData | null>(null)
 
@@ -19,7 +19,7 @@ export default function Home() {
     setScreen("auth")
   }
 
-  const handleLogin = (data: { health_center: string; nurse_name: string }) => {
+  const handleLogin = (data: { nurse_name: string; password: string }) => {
     setSession(data)
     setScreen("questionnaire")
   }

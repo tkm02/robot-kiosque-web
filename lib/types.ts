@@ -22,10 +22,10 @@ export interface QuestionnaireData {
   trimestre?: 1 | 2 | 3
   derniere_date_regles?: string
 
-  // 2. Données de Localisation
-  region: string
+  // 2. Données de Localisation (Simplifié)
+  region?: string
   district: string
-  commune: string
+  commune?: string
   gps_latitude?: number
   gps_longitude?: number
   usage_moustiquaire?: boolean

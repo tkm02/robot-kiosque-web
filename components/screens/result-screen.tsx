@@ -234,7 +234,7 @@ export default function ResultScreen({ data, questionnaire, onNewTest }: ResultS
                <div className="flex items-start gap-2 max-w-sm">
                   <MapPin className="w-3 h-3 text-slate-300 mt-1 flex-shrink-0" />
                   <p className="text-[9px] text-slate-400 leading-tight font-medium uppercase tracking-wide">
-                    Agent : {questionnaire.nurse_name} • {questionnaire.health_center} • PNLP V3.0
+                    Agent : {questionnaire.nurse_name} • PNLP V3.0
                   </p>
                </div>
                <div className="flex gap-2 w-full sm:w-auto">

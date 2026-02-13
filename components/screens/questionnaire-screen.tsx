@@ -10,14 +10,13 @@ import { useMemo, useState } from "react"
 
 interface QuestionnaireScreenProps {
   onComplete: (data: QuestionnaireData) => void
-  sessionData: { health_center: string; nurse_name: string }
+  sessionData: { nurse_name: string }
 }
 
 export default function QuestionnaireScreen({ onComplete, sessionData }: QuestionnaireScreenProps) {
   const [currentStepIndex, setCurrentStepIndex] = useState(0)
   const [answers, setAnswers] = useState<Partial<QuestionnaireData>>({
     robot_id: "KIOSK-CI-001", // Mock robot ID
-    health_center: sessionData.health_center,
     nurse_name: sessionData.nurse_name,
     source_type: "kiosque",
     data_quality_status: "en revue",
